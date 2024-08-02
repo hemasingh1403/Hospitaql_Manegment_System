@@ -1,0 +1,73 @@
+Mysql part codes
+=================================
+
+
+CREATE TABLE hospital (
+    hospital_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL DEFAULT 'Pratapgarh_jila_hospital',
+    address VARCHAR(255) NOT NULL DEFAULT 'Pratapgarh ranapratap choraha',
+    phone VARCHAR(15) NOT NULL DEFAULT '9628453433',
+    email VARCHAR(100) NOT NULL DEFAULT 'pbh@gmail.com'
+);
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    hospital_id INT NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    user_type ENUM('patient', 'doctor') NOT NULL,
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+);
+
+CREATE TABLE patients (
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    hospital_id INT NOT NULL,
+    name VARCHAR(100),
+    address VARCHAR(255),
+    phone VARCHAR(15),
+    date_of_birth DATE,
+    email VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+);
+
+CREATE TABLE doctors (
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    hospital_id INT NOT NULL,
+    name VARCHAR(100),
+    specialization VARCHAR(100),
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+);
+
+-- Create Tokens Table 
+CREATE TABLE tokens ( token_id INT AUTO_INCREMENT PRIMARY KEY, patient_id INT NOT NULL, doctor_id INT NOT NULL, hospital_id INT NOT NULL, issue_date DATETIME NOT NULL, status ENUM('pending', 'completed') DEFAULT 'pending', visit_time DATETIME, FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE, FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE, FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE );
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    hospital_id INT NOT NULL,
+    appointment_date DATETIME NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id),
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id)
+);
+
+-- Create Medical Records Table 
+CREATE TABLE medical_records ( record_id INT AUTO_INCREMENT PRIMARY KEY, patient_id INT NOT NULL, doctor_id INT NOT NULL, hospital_id INT NOT NULL, -- Add hospital_id column diagnosis TEXT NOT NULL, treatment TEXT NOT NULL, record_date DATE NOT NULL, FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE, FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE, FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE -- Add foreign key constraint );
+
+-- Create Billing Table
+CREATE TABLE billing (
+    bill_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    hospital_id INT NOT NULL,  -- Add hospital_id column
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_status ENUM('paid', 'unpaid') DEFAULT 'unpaid',
+    billing_date DATETIME NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
+    FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE  -- Add foreign key constraint
+);
